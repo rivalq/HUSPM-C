@@ -1,10 +1,11 @@
-#define DEV
+//#define DEV
 
 #include <bits/stdc++.h>
 #include <ranges>
 using namespace std;
+#include "utils.h"
 #include "format.h"
-#include "structs.h"
+#include "core.h"
 #include "parse.h"
 
 
@@ -15,5 +16,6 @@ int main() {
     cout << database.get_utility() << endl;
     auto st = database.initial_prune();
     database.construct_util_array();
+
 
 }

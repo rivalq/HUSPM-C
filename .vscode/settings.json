@@ -1,6 +1,7 @@
 {
-    "files.associations": {
-        "iosfwd": "cpp",
-        "stdexcept": "cpp"
-    }
+  "files.associations": {
+    "iosfwd": "cpp",
+    "stdexcept": "cpp"
+  },
+  "cmake.configureOnOpen": true
 }
