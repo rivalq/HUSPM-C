@@ -1,3 +1,6 @@
+
+
+
 template<typename T, typename U>
 struct _QItem {
     T id;
@@ -8,8 +11,18 @@ struct _QItem {
     bool operator < (const _QItem& rhs) const {
         return id < rhs.id;
     }
+    friend ostream& operator << (ostream& out, _QItem qt) {
+        out << "[ id = " << qt.id << ",quantity = " << qt.quantity << ",cost = " << qt.cost << " ]" << endl;
+        return out;
+    }
+
+    U absolute_utility() {
+        return cost * quantity;
+    }
 
 };
+
+
 
 template<typename T>
 struct _Item {
@@ -18,14 +31,37 @@ struct _Item {
     bool operator < (const _Item& rhs) const {
         return id < rhs.id;
     }
+    friend ostream& operator << (ostream& out, _Item qt) {
+        out << format("[ id = %c ]", qt.id) << endl;
+        return out;
+    }
 };
 
-using Item = _Item<int>;
-using QItem = _QItem<int, int>;
+using Item = _Item<char>;
+using QItem = _QItem<char, int>;
+
+template<typename T, typename U>
+struct _UtilArray {
+    int eid, next_pos, next_eid;
+    T id;
+    U u, ru;
+    _UtilArray() {}
+    _UtilArray(int eid, T id, U u, U ru, int next_pos, int next_eid) : eid(eid), id(id), u(u), ru(ru), next_pos(next_pos), next_eid(next_eid) {}
+
+    friend ostream& operator << (ostream& out, _UtilArray ut) {
+        return out << format("[ id = %c, eid = %d, u = %d, ru = %d, next_pos = %d, next_eid = %d ]", ut.id, ut.eid, ut.u, ut.ru, ut.next_pos, ut.next_eid) << endl;
+    }
+
+};
+using UtilArray = _UtilArray<char, int>;
+
+
 
 template<typename T, typename U>
 struct _QSequence {
     vector<set<QItem>> vals;
+    vector<UtilArray> ut_arr;
+    _QSequence(vector<set<QItem>> vals) :vals(vals) {}
 
     U get_utility() {
         U res = 0;
@@ -45,6 +81,13 @@ struct _QSequence {
         }
         return res;
     }
+
+    size_t length() {
+        size_t l = 0;
+        for (auto i : vals) l += i.size();
+        return l;
+    }
+
     void remove_items(const set<Item>& st) {
         vector<set<QItem>> new_vals;
         for (auto i : vals) {
@@ -60,13 +103,45 @@ struct _QSequence {
         }
         swap(vals, new_vals);
     }
+    //we will have 1-based indexing
+    vector<UtilArray> construct_util_array() {
+        int id = length();
+        int eid = vals.size();
+        int next_eid = -1;
+        U ru = static_cast<U>(0);
+        ut_arr.resize(id + 1);
+        map<T, int> next_pos;
+        for (auto st : vals | views::reverse) {
+            for (auto it : st | views::reverse) {
+                ut_arr[id].id = it.id;
+                ut_arr[id].eid = eid;
+                ut_arr[id].u = it.absolute_utility();
+                ut_arr[id].ru = ru;
+                ut_arr[id].next_eid = next_eid;
+                ru += ut_arr[id].u;
+                if (next_pos.count(it.id)) {
+                    ut_arr[id].next_pos = next_pos[it.id];
+                }
+                else {
+                    ut_arr[id].next_pos = -1;
+                }
+                next_pos[it.id] = id;
+                id--;
+            }
+            next_eid = id + 1;
+            eid--;
+        }
+        return ut_arr;
+    }
 };
-using QSequence = _QSequence<int, int>;
+using QSequence = _QSequence<char, int>;
 
 template<typename T, typename U>
 struct QDatabase {
     vector < QSequence > database;
     U min_util;
+
+    QDatabase(vector<QSequence> database) :database(database) {}
 
     U get_utility() {
         U res = 0;
@@ -91,7 +166,7 @@ struct QDatabase {
         @Remove Items from database which are present in set st
     */
     void remove_items(const set<Item>& st) {
-        for (auto i : database) {
+        for (auto& i : database) {
             i.remove_items(st);
         }
     }
@@ -99,7 +174,7 @@ struct QDatabase {
     /*
         @Remove 1-Sequences which has SWU < min_util
     */
-    void initial_prune() {
+    set<Item> initial_prune() {
         auto mp = get_swu_values();
         set<Item> st;
         for (auto i : mp) {
@@ -108,5 +183,17 @@ struct QDatabase {
             }
         }
         remove_items(st);
+        return st;
+    }
+    void construct_util_array() {
+        for (auto& i : database) {
+            auto arr = i.construct_util_array();
+#ifdef DEV
+            for (auto j : arr | views::drop(1)) {
+                cout << j << endl;
+            }
+            cout << "--------\n";
+#endif
+        }
     }
 };
