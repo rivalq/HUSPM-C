@@ -1,5 +1,5 @@
 
-QDatabase<char, int> parse_data(string file_path) {
+QDatabase parse_data(string file_path) {
     ifstream cin(file_path);
     int num_items, num_sequences;
     cin >> num_items >> num_sequences;

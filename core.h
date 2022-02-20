@@ -4,7 +4,7 @@ struct _QItem {
 	T id;
 	U cost;
 	int quantity;
-	_QItem(T id) :id(id) {}
+	_QItem(T id) : id(id) {}
 	_QItem(T id, int quantity, U cost) : id(id), quantity(quantity), cost(cost) {}
 
 	bool operator < (const _QItem& rhs) const {
@@ -52,6 +52,7 @@ struct _UtilArray {
 	int eid, next_pos, next_eid;
 	T id;
 	U u, ru;
+	map<T, int> next_mp;
 	_UtilArray() {}
 	_UtilArray(int eid, T id, U u, U ru, int next_pos, int next_eid) : eid(eid), id(id), u(u), ru(ru), next_pos(next_pos), next_eid(next_eid) {}
 
@@ -67,8 +68,8 @@ using UtilArray = _UtilArray<char, int>;
  * @ return utility of given itemset (st_1) in given q-itemset (st_2). If st_1 is not subset of st_2 return error of Not subset
  *
  */
-template<typename T>
-Result < T, ErrorCode> get_utility(set<Item> st_1, set<QItem> st_2) {
+template<typename T = int>
+Result < T, ErrorCode> utility(set<Item> st_1, set<QItem> st_2) {
 	if (st_1.size() > st_2.size())return Result<T, ErrorCode> {.type = ResultType::Error, .error = ErrorCode::NOT_SUBSET};
 	T utility = 0;
 	for (auto i : st_1) {
@@ -80,7 +81,6 @@ Result < T, ErrorCode> get_utility(set<Item> st_1, set<QItem> st_2) {
 		else {
 			auto p = *itr;
 			utility += p.absolute_utility();
-			//utility += itr->absolute_utility();
 		}
 	}
 	return Result<T, ErrorCode>{.type = ResultType::Ok, .value = utility};
@@ -92,7 +92,8 @@ struct _QSequence {
 	vector<set<QItem>> vals;
 	vector<UtilArray> ut_arr;
 	_QSequence(vector<set<QItem>> vals) :vals(vals) {}
-
+	int match = 0;
+	U prefix_util = 0;
 	U get_utility() {
 		U res = 0;
 		for (auto i : vals) {
@@ -156,6 +157,7 @@ struct _QSequence {
 					ut_arr[id].next_pos = -1;
 				}
 				next_pos[it.id] = id;
+				ut_arr[id].next_mp = next_pos;
 				id--;
 			}
 			next_eid = id + 1;
@@ -178,7 +180,7 @@ struct _QSequence {
 		}
 		for (auto st : vals) {
 			for (int j = m; j >= 1; j--) {
-				auto res = get_utility(seq[j - 1], st);
+				auto res = utility(seq[j - 1], st);
 				if (res.type == ResultType::Ok and dp[j - 1].type == ResultType::Ok) {
 					if (dp[j].type == ResultType::Error or dp[j].value < res.value + dp[j - 1].value) {
 						dp[j] = Result<U, ErrorCode>{ .type = ResultType::Ok, .value = dp[j - 1].value + res.value };
@@ -189,15 +191,87 @@ struct _QSequence {
 		return dp[m];
 	}
 
+	void get_i_items(set<Item>& st) {
+		int match_eid = -1;
+		if (match > 0) {
+			match_eid = ut_arr[match].eid;
+		}
+		for (int j = match + 1; j < ut_arr.size(); j++) {
+			if (ut_arr[j].eid != match_eid)break;
+			st.insert(ut_arr[j].id);
+		}
+	}
+	void get_s_items(set<Item>& st) {
+		int j = 1;
+		if (match > 0) {
+			j = ut_arr[j].next_eid;
+		}
+		if (j == -1)return;
+		for (j;j < ut_arr.size(); j++) {
+			st.insert(ut_arr[j].id);
+		}
+	}
+
+	Result<U, ErrorCode> get_upper_bound(Item it, bool i_item = 1) {
+		if (match == 0 and i_item)return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+		if (i_item) {
+			auto& mp = ut_arr[match].next_mp;
+			if (mp.count(it.id) == 0) {
+				return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+			}
+			int j = mp[it.id];
+			if (ut_arr[j].eid != ut_arr[match].eid) {
+				return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+			}
+			U val = prefix_util + ut_arr[j].ru + ut_arr[j].u;
+			return Result<U, ErrorCode>{.type = ResultType::Ok, .value = val};
+		}
+		else {
+			int next_eid = 1;
+			if (match != 0)next_eid = ut_arr[match].next_eid;
+			if (next_eid == -1) {
+				return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+			}
+			auto& mp = ut_arr[next_eid].next_mp;
+			if (mp.count(it.id) == 0) {
+				return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+			}
+			int j = mp[it.id];
+			U val = prefix_util + ut_arr[j].ru + ut_arr[j].u;
+			return Result<U, ErrorCode>{.type = ResultType::Ok, .value = val};
+		}
+	}
+	void increment_prefix(Item it, bool i_item = 1) {
+		if (i_item) {
+			assert(match != 0);
+			assert(ut_arr[match].next_mp.count(it.id));
+			int next_match = ut_arr[match].next_mp[it.id];
+			assert(ut_arr[next_match].eid == ut_arr[match].eid);
+			prefix_util += ut_arr[next_match].u;
+			match = next_match;
+		}
+		else {
+			int next_eid = 1;
+			if (match != 0)next_eid = ut_arr[match].next_eid;
+			assert(next_eid != -1);
+			assert(ut_arr[next_eid].next_mp.count(it.id));
+			int next_match = ut_arr[next_eid].next_mp[it.id];
+			prefix_util += ut_arr[next_match].u;
+			match = next_match;
+		}
+	}
+
 };
 using QSequence = _QSequence<char, int>;
+using Sequence = vector<set<Item>>;
+
 
 template<typename T, typename U>
-struct QDatabase {
+struct _QDatabase {
 	vector < QSequence > database;
 	U min_util;
 
-	QDatabase(vector<QSequence> database) :database(database) {}
+	_QDatabase(vector<QSequence> database) :database(database) {}
 
 	U get_utility() {
 		U res = 0;
@@ -250,6 +324,8 @@ struct QDatabase {
 			}
 			cout << "--------\n";
 #endif
+			}
 		}
-	}
-};
+	};
+
+using QDatabase = _QDatabase<char, int>;

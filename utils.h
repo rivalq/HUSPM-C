@@ -19,4 +19,4 @@ struct Result {
         struct { E error; }; // Error
     };
 };
-enum class ErrorCode { NOT_SUBSET, INVALID };
+enum class ErrorCode { NOT_SUBSET, INVALID, NOT_FOUND };
