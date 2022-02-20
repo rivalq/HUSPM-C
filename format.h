@@ -1,3 +1,9 @@
+/*
+ * Created on Sun Feb 20 2022
+ *
+ * Author: Jatin Garg, Lakshay Jindal, Ojus Bhutani
+ */
+
 template<typename ... Args>
 std::string format(const std::string& format, Args ... args) {
     int size_s = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'

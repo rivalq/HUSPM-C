@@ -1,3 +1,9 @@
+/*
+ * Created on Sun Feb 20 2022
+ *
+ * Author: Jatin Garg, Lakshay Jindal, Ojus Bhutani
+ */
+
 
 QDatabase parse_data(string file_path) {
     ifstream cin(file_path);

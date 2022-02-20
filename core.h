@@ -1,3 +1,8 @@
+/*
+ * Created on Sun Feb 20 2022
+ *
+ * Author: Jatin Garg, Lakshay Jindal, Ojus Bhutani
+ */
 
 template<typename T, typename U>
 struct _QItem {
@@ -324,8 +329,8 @@ struct _QDatabase {
 			}
 			cout << "--------\n";
 #endif
-			}
 		}
-	};
+	}
+};
 
 using QDatabase = _QDatabase<char, int>;

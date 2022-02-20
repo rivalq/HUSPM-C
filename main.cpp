@@ -1,4 +1,12 @@
-//#define DEV
+/*
+ * Created on Sun Feb 20 2022
+ *
+ * Author: Jatin Garg, Lakshay Jindal, Ojus Bhutani
+ */
+
+
+ //#define DEV
+
 
 #include <bits/stdc++.h>
 #include <ranges>
