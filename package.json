@@ -1,0 +1,23 @@
+{
+  "name": "huspm",
+  "version": "0.0.1",
+  "type":"module",
+  "description": "High Utility Sequential Pattern Mining",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "g++ -std=c++20 ./core/main.cpp",
+    "gen-tests":"node index.js gen-tests",
+    "run":"node index.js run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rivalq/HUSPM-C-.git"
+  },
+  "author": "rivalq",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rivalq/HUSPM-C-/issues"
+  },
+  "homepage": "https://github.com/rivalq/HUSPM-C-#readme"
+}

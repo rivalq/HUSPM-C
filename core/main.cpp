@@ -136,20 +136,26 @@ ostream& operator << (ostream& out, Sequence seq) {
     return out << str;
 }
 
-int main() {
-    auto database = parse_data("test.txt");
-    database.min_util = 0;
+int main(int argc, char const* argv[]) {
+    if (argc < 3) {
+        cout << "Specify input and output files" << endl;
+        exit(-1);
+    }
+    string input = argv[1];
+    string output = argv[2];
+    auto database = parse_data(input);
+    database.min_util = 5;
     database.construct_util_array();
     Sequence pattern;
     vector<int> ids(database.database.size());
     iota(ids.begin(), ids.end(), 0);
     LQS_Dfs(pattern, database, ids);
     {
-        ofstream cout("output.txt");
+        ofstream cout(output);
         cout << HUSPs.size() << endl;
         for (auto i : HUSPs) {
             auto [seq, util] = i;
-            cout << seq << endl;
+            cout << seq << " " << util << endl;
         }
     }
 }
