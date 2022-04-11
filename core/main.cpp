@@ -19,16 +19,34 @@ using namespace std;
 
 map<Sequence, int> HUSPs;
 
+ostream& operator << (ostream& out, Sequence seq) {
+    string str = "<";
+    for (auto i : seq) {
+        str += " [";
+        for (auto j : i) {
+
+            str.push_back(j.id);
+            str.push_back(',');
+        }
+        if (str.back() == ',')str.pop_back();
+        str += "],";
+    }
+    if (str.back() == ',')str.pop_back();
+    str += " >";
+    return out << str;
+}
+
+
 void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
     set<Item> i_items, s_items;
-    cout << "In" << endl;
+    //cout << "In" << endl;
     auto get = [&](int i) {return database.database[i];};
 
     for (auto q_seq : ids | views::transform(get)) {
         q_seq.get_i_items(i_items);
         q_seq.get_s_items(s_items);
     }
-    cout << i_items.size() << " " << s_items.size() << endl;
+    //cout << i_items.size() << " " << s_items.size() << endl;
     for (auto item : i_items) {
         int upper_bound = 0;
         vector<int> new_ids;
@@ -96,6 +114,8 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
             util += res.value;
         }
         if (util >= database.min_util) {
+            cout << util << endl;
+            cout << pattern << endl;
             HUSPs[pattern] = util;
         }
         vector<int> old_match, old_prefix_util;
@@ -119,22 +139,6 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
     }
 }
 
-ostream& operator << (ostream& out, Sequence seq) {
-    string str = "<";
-    for (auto i : seq) {
-        str += " [";
-        for (auto j : i) {
-
-            str.push_back(j.id);
-            str.push_back(',');
-        }
-        if (str.back() == ',')str.pop_back();
-        str += "],";
-    }
-    if (str.back() == ',')str.pop_back();
-    str += " >";
-    return out << str;
-}
 
 int main(int argc, char const* argv[]) {
     if (argc < 3) {
@@ -144,18 +148,19 @@ int main(int argc, char const* argv[]) {
     string input = argv[1];
     string output = argv[2];
     auto database = parse_data(input);
-    database.min_util = 5;
+    database.min_util = 1000;
     database.construct_util_array();
     Sequence pattern;
     vector<int> ids(database.database.size());
     iota(ids.begin(), ids.end(), 0);
+    //ofstream cout(output);
     LQS_Dfs(pattern, database, ids);
     {
-        ofstream cout(output);
-        cout << HUSPs.size() << endl;
+        //ofstream cout(output);
+        /*cout << HUSPs.size() << endl;
         for (auto i : HUSPs) {
             auto [seq, util] = i;
             cout << seq << " " << util << endl;
-        }
+        }*/
     }
 }

@@ -1,7 +1,20 @@
 {
   "files.associations": {
     "iosfwd": "cpp",
-    "stdexcept": "cpp"
+    "stdexcept": "cpp",
+    "*.tcc": "cpp",
+    "chrono": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "functional": "cpp",
+    "map": "cpp",
+    "memory_resource": "cpp",
+    "ranges": "cpp",
+    "scoped_allocator": "cpp",
+    "streambuf": "cpp",
+    "tuple": "cpp",
+    "utility": "cpp",
+    "type_traits": "cpp"
   },
   "cmake.configureOnOpen": true,
   "C_Cpp.errorSquiggles": "Disabled"
