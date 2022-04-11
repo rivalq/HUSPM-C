@@ -78,7 +78,7 @@ export default function generator() {
   };
   main().then(() => {
     exec(
-      `./data-gen/lib/gen seq -ncust ${transaction_count} -nitems ${num_items} -fname data -ascii`,
+      `./data-gen/lib/gen seq -ncust ${transaction_count} -nitems ${num_items} -slen 1 -tlen 1 -fname data -ascii`,
       function (err, stdout, stderr) {
         readFile("./data.data", "utf-8", function read(err, data) {
           if (err) {

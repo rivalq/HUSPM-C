@@ -18,6 +18,7 @@ using namespace std;
 
 
 map<Sequence, int> HUSPs;
+string input, output;
 
 ostream& operator << (ostream& out, Sequence seq) {
     string str = "<";
@@ -25,7 +26,7 @@ ostream& operator << (ostream& out, Sequence seq) {
         str += " [";
         for (auto j : i) {
 
-            str.push_back(j.id);
+            str += (to_string(j.id));
             str.push_back(',');
         }
         if (str.back() == ',')str.pop_back();
@@ -70,6 +71,8 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
             util += res.value;
         }
         if (util >= database.min_util) {
+            //ofstream(output);
+            //cout << util << " " << pattern << endl;
             HUSPs[pattern] = util;
         }
         vector<int> old_match, old_prefix_util;
@@ -114,8 +117,8 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
             util += res.value;
         }
         if (util >= database.min_util) {
-            cout << util << endl;
-            cout << pattern << endl;
+            //ofstream(output);
+            //cout << util << " " << pattern << endl;
             HUSPs[pattern] = util;
         }
         vector<int> old_match, old_prefix_util;
@@ -145,22 +148,25 @@ int main(int argc, char const* argv[]) {
         cout << "Specify input and output files" << endl;
         exit(-1);
     }
-    string input = argv[1];
-    string output = argv[2];
+    if (argc < 4) {
+        cout << "Specify Min utility" << endl;
+        exit(-1);
+    }
+    input = argv[1];
+    output = argv[2];
     auto database = parse_data(input);
-    database.min_util = 1000;
+    database.min_util = stoi(argv[3]);
     database.construct_util_array();
     Sequence pattern;
     vector<int> ids(database.database.size());
     iota(ids.begin(), ids.end(), 0);
-    //ofstream cout(output);
     LQS_Dfs(pattern, database, ids);
     {
-        //ofstream cout(output);
-        /*cout << HUSPs.size() << endl;
+        ofstream cout(output);
+        cout << HUSPs.size() << endl;
         for (auto i : HUSPs) {
             auto [seq, util] = i;
             cout << seq << " " << util << endl;
-        }*/
+        }
     }
 }

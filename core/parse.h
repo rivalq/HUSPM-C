@@ -9,9 +9,9 @@ QDatabase parse_data(string file_path) {
     ifstream cin(file_path);
     int num_items, num_sequences;
     cin >> num_items >> num_sequences;
-    map <char, int> ptable;
+    map <int, int> ptable;
     for (int i = 0; i < num_items; i++) {
-        char id;cin >> id;
+        int id;cin >> id;
         int profit; cin >> profit;
         ptable[id] = profit;
     }
@@ -23,7 +23,7 @@ QDatabase parse_data(string file_path) {
             int k; cin >> k;
             set<QItem> st;
             while (k--) {
-                char id; cin >> id;
+                int id; cin >> id;
                 int quantity; cin >> quantity;
                 st.insert(QItem(id, quantity, ptable[id]));
             }

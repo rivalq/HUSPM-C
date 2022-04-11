@@ -49,8 +49,8 @@ struct _Item {
 	}
 };
 
-using Item = _Item<char>;
-using QItem = _QItem<char, int>;
+using Item = _Item<int>;
+using QItem = _QItem<int, int>;
 
 template<typename T, typename U>
 struct _UtilArray {
@@ -66,7 +66,7 @@ struct _UtilArray {
 	}
 
 };
-using UtilArray = _UtilArray<char, int>;
+using UtilArray = _UtilArray<int, int>;
 
 
 /**
@@ -267,7 +267,7 @@ struct _QSequence {
 	}
 
 };
-using QSequence = _QSequence<char, int>;
+using QSequence = _QSequence<int, int>;
 using Sequence = vector<set<Item>>;
 
 
@@ -333,4 +333,4 @@ struct _QDatabase {
 	}
 };
 
-using QDatabase = _QDatabase<char, int>;
+using QDatabase = _QDatabase<int, int>;
