@@ -13,4 +13,6 @@ High Utility Sequential Pattern Mining in C++
 ### Todo list Part 1
 
 - [x] Implementing model without optimizations
-- [ ] Optmizing utility function (bottle neck).
+- [x] Thinking about some approximate approach (soft computing) 
+- [ ] Implement above appraoch and compare
+- [ ] Optmizing utility function (optional)
