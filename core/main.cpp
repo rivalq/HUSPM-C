@@ -15,7 +15,7 @@ using namespace std;
 #include "format.h"
 #include "core.h"
 #include "parse.h"
-
+#include "soft.h"
 
 map<Sequence, int> HUSPs;
 string input, output;
@@ -72,6 +72,7 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
         }
         if (util >= database.min_util) {
             //ofstream(output);
+            cout << pattern << " " << util << endl;
             //cout << util << " " << pattern << endl;
             HUSPs[pattern] = util;
         }
@@ -118,6 +119,7 @@ void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
         }
         if (util >= database.min_util) {
             //ofstream(output);
+            cout << pattern << " " << util << endl;
             //cout << util << " " << pattern << endl;
             HUSPs[pattern] = util;
         }
@@ -154,6 +156,7 @@ int main(int argc, char const* argv[]) {
     }
     input = argv[1];
     output = argv[2];
+    freopen(output.c_str(), "w", stdout);
     auto database = parse_data(input);
     database.min_util = stoi(argv[3]);
     database.construct_util_array();
@@ -162,11 +165,14 @@ int main(int argc, char const* argv[]) {
     iota(ids.begin(), ids.end(), 0);
     LQS_Dfs(pattern, database, ids);
     {
-        ofstream cout(output);
-        cout << HUSPs.size() << endl;
-        for (auto i : HUSPs) {
+        //ofstream cout(output);
+        cout << "Min Util: " << database.min_util << endl;
+        cout << "Elapsed Time (Seconds): " << 1.0 * clock() / CLOCKS_PER_SEC << endl;
+
+        cout << "HUSPs Count: " << HUSPs.size() << endl;
+        /*for (auto i : HUSPs) {
             auto [seq, util] = i;
             cout << seq << " " << util << endl;
-        }
+        }*/
     }
 }

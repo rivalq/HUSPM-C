@@ -3,6 +3,7 @@
  *
  * Author: Jatin Garg, Lakshay Jindal, Ojus Bhutani
  */
+const int MAX_ITEMS = 1200;
 
 template<typename T, typename U>
 struct _QItem {
@@ -95,8 +96,14 @@ Result < T, ErrorCode> utility(set<Item> st_1, set<QItem> st_2) {
 template<typename T, typename U>
 struct _QSequence {
 	vector<set<QItem>> vals;
+	vector<bitset<MAX_ITEMS>> bitvec;
 	vector<UtilArray> ut_arr;
-	_QSequence(vector<set<QItem>> vals) :vals(vals) {}
+	_QSequence(vector<set<QItem>> vals) :vals(vals) {
+		bitvec.resize(vals.size());
+		for (int i = 0; i < vals.size(); i++) {
+			for (auto j : vals[i])bitvec[i][j.id] = 1;
+		}
+	}
 	int match = 0;
 	U prefix_util = 0;
 	U get_utility() {
@@ -138,6 +145,11 @@ struct _QSequence {
 			}
 		}
 		swap(vals, new_vals);
+		bitvec.clear();
+		bitvec.resize(vals.size());
+		for (int i = 0; i < vals.size(); i++) {
+			for (auto j : vals[i])bitvec[i][j.id] = 1;
+		}
 	}
 	//we will have 1-based indexing
 	vector<UtilArray> construct_util_array() {
@@ -215,6 +227,38 @@ struct _QSequence {
 		for (j;j < ut_arr.size(); j++) {
 			st.insert(ut_arr[j].id);
 		}
+	}
+	Result<U, ErrorCode> get_upper_bound(biset<MAX_ITEMS> bt) {
+		assert(bt.count() > 0);
+		int next_eid = 1;
+		if (match != 0)next_eid = ut_arr[match].next_eid;
+		if (next_eid == -1) {
+			return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
+		}
+		int id = next_eid;
+		next_eid = ut_arr[next_eid].eid;
+		for (int j = next_eid; j < bitvec.size(); j++) {
+			if ((bt & bitvec[j]) == bt) {
+				int bound = prefix_util;
+				int next_next = ut_arr[id].next_eid;
+				if (next_next != -1)bound += ut_arr[next_next].ru;
+				int l = bt._Find_first();
+				while (l != MAX_ITEMS and id < next_next) {
+					if (ut_arr[id].id < l)id++;
+					else if (ut_arr[id] == l) {
+						bound += ut_arr[id].u;
+						id++;
+						l = bt._Find_next();
+					}
+					else {
+						l = bt._Find_next();
+					}
+				}
+				return ResultType<U, ErrorCode>{.type = ResultType::Ok, .value = bound};
+			}
+			id += bitvec[j].count();
+		}
+		return Result<U, ErrorCode>{.type = ResultType::Error, .error = ErrorCode::NOT_FOUND};
 	}
 
 	Result<U, ErrorCode> get_upper_bound(Item it, bool i_item = 1) {
