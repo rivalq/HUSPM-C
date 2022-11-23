@@ -11,31 +11,18 @@
 #include <bits/stdc++.h>
 #include <ranges>
 using namespace std;
+
+
+
 #include "utils.h"
 #include "format.h"
 #include "core.h"
 #include "parse.h"
-#include "soft.h"
-
 map<Sequence, int> HUSPs;
+
+
 string input, output;
 
-ostream& operator << (ostream& out, Sequence seq) {
-    string str = "<";
-    for (auto i : seq) {
-        str += " [";
-        for (auto j : i) {
-
-            str += (to_string(j.id));
-            str.push_back(',');
-        }
-        if (str.back() == ',')str.pop_back();
-        str += "],";
-    }
-    if (str.back() == ',')str.pop_back();
-    str += " >";
-    return out << str;
-}
 
 
 void LQS_Dfs(Sequence pattern, QDatabase& database, vector<int> ids) {
@@ -156,6 +143,7 @@ int main(int argc, char const* argv[]) {
     }
     input = argv[1];
     output = argv[2];
+    output += "_soft.txt";
     freopen(output.c_str(), "w", stdout);
     auto database = parse_data(input);
     database.min_util = stoi(argv[3]);
@@ -164,6 +152,7 @@ int main(int argc, char const* argv[]) {
     vector<int> ids(database.database.size());
     iota(ids.begin(), ids.end(), 0);
     LQS_Dfs(pattern, database, ids);
+    //solve_soft(pattern, database, ids);
     {
         //ofstream cout(output);
         cout << "Min Util: " << database.min_util << endl;

@@ -1,6 +1,6 @@
 Number of customers in database = 10
 Average sequence length = 10
-Average transaction length = 2.5
+Average transaction length = 4
 Number of items = 10
 Repetition-level = 0
 Variation in repetition-level = 0.1

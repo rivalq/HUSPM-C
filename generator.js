@@ -29,6 +29,7 @@ export default function generator() {
     r_quantity = await question(
       "Enter Highest possible quantity possible in itemset: "
     );*/
+    console.log(transaction_count, num_items);
 
     let s = await question(
       "Enter probability distribution of profits [1-10]: "
@@ -78,7 +79,7 @@ export default function generator() {
   };
   main().then(() => {
     exec(
-      `./data-gen/lib/gen seq -ncust ${transaction_count} -nitems ${num_items} -slen 1 -tlen 1 -fname data -ascii`,
+      `./data-gen/lib/gen seq -ncust ${transaction_count} -nitems ${num_items} -slen 10 -tlen 4 -fname data -ascii`,
       function (err, stdout, stderr) {
         readFile("./data.data", "utf-8", function read(err, data) {
           if (err) {
@@ -115,15 +116,15 @@ export default function generator() {
               }
               for (const val of mp.entries()) {
                 let arr = val[1];
-                str += `${arr.length} `;
+                str += `${arr.length}\n`;
                 for (let i = 0; i < arr.length; i++) {
                   let temp = arr[i];
-                  str += `${temp.length} `;
+                  str += `${temp.length}\n`;
                   for (let j = 0; j < temp.length; j++) {
                     str += `${temp[j][0]} ${temp[j][1]} `;
                   }
+                  str += "\n";
                 }
-                str += "\n";
               }
               mkdirSync(`./tests/${test_num}`);
               writeFile(`./tests/${test_num}/input.txt`, str, (err) => {

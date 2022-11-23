@@ -14,7 +14,21 @@
     "streambuf": "cpp",
     "tuple": "cpp",
     "utility": "cpp",
-    "type_traits": "cpp"
+    "type_traits": "cpp",
+    "bitset": "cpp",
+    "__config": "cpp",
+    "__hash_table": "cpp",
+    "__tree": "cpp",
+    "set": "cpp",
+    "filesystem": "cpp",
+    "locale": "cpp",
+    "sstream": "cpp",
+    "typeinfo": "cpp",
+    "version": "cpp",
+    "algorithm": "cpp",
+    "complex": "cpp",
+    "vector": "cpp",
+    "iterator": "cpp"
   },
   "cmake.configureOnOpen": true,
   "C_Cpp.errorSquiggles": "Disabled"

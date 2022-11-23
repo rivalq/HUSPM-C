@@ -17,7 +17,7 @@ struct _QItem {
 		return id < rhs.id;
 	}
 	friend ostream& operator << (ostream& out, _QItem qt) {
-		out << format("[ id = %c, quantity = %d, cost = %d ]", qt.id, qt.quantity, qt.cost) << endl;
+		out << format("[ id = %d, quantity = %d, cost = %d ]", qt.id, qt.quantity, qt.cost) << endl;
 		return out;
 	}
 
@@ -45,7 +45,7 @@ struct _Item {
 		return id < rhs.id;
 	}
 	friend ostream& operator << (ostream& out, _Item qt) {
-		out << format("[ id = %c ]", qt.id) << endl;
+		out << format("[ id = %d ]", qt.id) << endl;
 		return out;
 	}
 };
@@ -95,10 +95,10 @@ Result < T, ErrorCode> utility(set<Item> st_1, set<QItem> st_2) {
 
 template<typename T, typename U>
 struct _QSequence {
-	vector<set<QItem>> vals;
-	vector<bitset<MAX_ITEMS>> bitvec;
+	deque<set<QItem>> vals;
+	deque<bitset<MAX_ITEMS>> bitvec;
 	vector<UtilArray> ut_arr;
-	_QSequence(vector<set<QItem>> vals) :vals(vals) {
+	_QSequence(deque<set<QItem>> vals) :vals(vals) {
 		bitvec.resize(vals.size());
 		for (int i = 0; i < vals.size(); i++) {
 			for (auto j : vals[i])bitvec[i][j.id] = 1;
@@ -132,7 +132,7 @@ struct _QSequence {
 	}
 
 	void remove_items(const set<Item>& st) {
-		vector<set<QItem>> new_vals;
+		deque<set<QItem>> new_vals;
 		for (auto i : vals) {
 			set<QItem> new_itemset;
 			for (auto j : i) {
@@ -208,6 +208,34 @@ struct _QSequence {
 		return dp[m];
 	}
 
+
+	int get_utility(bitset<MAX_ITEMS>& bt, set<QItem>& st) {
+		int res = 0;
+		for (int i = bt._Find_first(); i < bt.size(); i = bt._Find_next(i)) {
+			auto item = static_cast<QItem>(i);
+			auto itr = st.lower_bound(item);
+			assert(itr->id == i);
+			auto p = *itr;
+			res += p.absolute_utility();
+		}
+		return res;
+	}
+
+	int get_utility(vector<bitset<MAX_ITEMS>> bt) {
+		int m = bt.size();
+		int n = vals.size();
+		vector<int> dp(m + 1, INT_MIN);
+		dp[0] = 0;
+		for (int i = 0; i < n; i++) {
+			for (int j = m; j >= 1; j--) {
+				if ((bt[j - 1] & bitvec[i]) == bt[j - 1]) {
+					dp[j] = max(dp[j], dp[j - 1] + get_utility(bt[j - 1], vals[i]));
+				}
+			}
+		}
+		return dp[m];
+	}
+
 	void get_i_items(set<Item>& st) {
 		int match_eid = -1;
 		if (match > 0) {
@@ -228,7 +256,7 @@ struct _QSequence {
 			st.insert(ut_arr[j].id);
 		}
 	}
-	Result<U, ErrorCode> get_upper_bound(biset<MAX_ITEMS> bt) {
+	Result<U, ErrorCode> get_upper_bound(bitset<MAX_ITEMS> bt) {
 		assert(bt.count() > 0);
 		int next_eid = 1;
 		if (match != 0)next_eid = ut_arr[match].next_eid;
@@ -245,16 +273,16 @@ struct _QSequence {
 				int l = bt._Find_first();
 				while (l != MAX_ITEMS and id < next_next) {
 					if (ut_arr[id].id < l)id++;
-					else if (ut_arr[id] == l) {
+					else if (ut_arr[id].id == l) {
 						bound += ut_arr[id].u;
 						id++;
-						l = bt._Find_next();
+						l = bt._Find_next(l);
 					}
 					else {
-						l = bt._Find_next();
+						l = bt._Find_next(l);
 					}
 				}
-				return ResultType<U, ErrorCode>{.type = ResultType::Ok, .value = bound};
+				return Result<U, ErrorCode>{.type = ResultType::Ok, .value = bound};
 			}
 			id += bitvec[j].count();
 		}
@@ -310,6 +338,15 @@ struct _QSequence {
 		}
 	}
 
+
+	bool check_PBV(bitset<MAX_ITEMS> bt) {
+		for (auto i : bitvec) {
+			if ((i & bt) == bt)return true;
+		}
+		return false;
+	}
+
+
 };
 using QSequence = _QSequence<int, int>;
 using Sequence = vector<set<Item>>;
@@ -319,8 +356,10 @@ template<typename T, typename U>
 struct _QDatabase {
 	vector < QSequence > database;
 	U min_util;
+	int num_items, max_k;
 
-	_QDatabase(vector<QSequence> database) :database(database) {}
+	_QDatabase() {}
+	_QDatabase(vector<QSequence> database, int num_items, int max_k) :database(database), num_items(num_items), max_k(max_k) {}
 
 	U get_utility() {
 		U res = 0;
@@ -367,13 +406,17 @@ struct _QDatabase {
 	void construct_util_array() {
 		for (auto& i : database) {
 			auto arr = i.construct_util_array();
-#ifdef DEV
-			for (auto j : arr | views::drop(1)) {
-				cout << j << endl;
-			}
-			cout << "--------\n";
-#endif
 		}
+	}
+
+	vector<int> check_PBV(bitset<MAX_ITEMS> bt) {
+		vector<int> res;
+		for (int i = 0; i < database.size(); i++) {
+			if (database[i].check_PBV(bt)) {
+				res.push_back(i);
+			}
+		}
+		return res;
 	}
 };
 
