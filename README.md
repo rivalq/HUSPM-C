@@ -9,10 +9,3 @@ High Utility Sequential Pattern Mining in C++
 ### Implementation
 
 > Our Current goal is to write a model in low level langauge, in our case C++, Then switch to some high level language like julia or python to run machine learning algorithm on top of model written in C++.
-
-### Todo list Part 1
-
-- [x] Implementing model without optimizations
-- [x] Thinking about some approximate approach (soft computing) 
-- [ ] Implement above appraoch and compare
-- [ ] Optmizing utility function (optional)
